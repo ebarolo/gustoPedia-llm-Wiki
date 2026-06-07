@@ -3,12 +3,13 @@ import logging
 import os
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from pydantic import BaseModel
 
 from shared.auth import require_auth
 from shared.supabase import get_supabase_client
 from wiki_builder.wiki_service import WikiService
+from wiki_builder.pdf_ingestion_service import PDFIngestionService
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/wiki", tags=["wiki"])
@@ -30,9 +31,81 @@ class IngestRecipeRequest(BaseModel):
     recipe_id: str
 
 
+class JobRecord(BaseModel):
+    id: str
+    file_path: str
+    url: Optional[str] = None
+    parent_job_id: Optional[str] = None
+
+
+class IngestRecipePDFRequest(BaseModel):
+    record: JobRecord
+
+
+class IngestBookPDFRequest(BaseModel):
+    record: JobRecord
+
+
+class IngestBookChapterRequest(BaseModel):
+    record: JobRecord
+
+
 class BackfillRequest(BaseModel):
     limit: int = 50
     offset: int = 0
+
+
+# Background task helpers
+async def _run_recipe_pdf(svc: PDFIngestionService, job_id: str, file_path: str):
+    try:
+        await svc.process_recipe_pdf(job_id, file_path)
+    except Exception as e:
+        logger.exception("Background process_recipe_pdf failed for job_id=%s", job_id)
+
+
+async def _run_book_pdf(svc: PDFIngestionService, job_id: str, file_path: str):
+    try:
+        await svc.process_book_pdf(job_id, file_path)
+    except Exception as e:
+        logger.exception("Background process_book_pdf failed for job_id=%s", job_id)
+
+
+async def _run_book_chapter(svc: PDFIngestionService, job_id: str, parent_job_id: str, chapter_index: int, file_path: str):
+    try:
+        await svc.process_book_chapter(job_id, parent_job_id, chapter_index, file_path)
+    except Exception as e:
+        logger.exception("Background process_book_chapter failed for job_id=%s", job_id)
+
+
+@router.post("/ingest-recipe-pdf", dependencies=[Depends(require_auth)])
+async def ingest_recipe_pdf(body: IngestRecipePDFRequest, background_tasks: BackgroundTasks):
+    svc = PDFIngestionService(db=get_supabase_client())
+    background_tasks.add_task(_run_recipe_pdf, svc, body.record.id, body.record.file_path)
+    return {"status": "accepted", "message": "Single recipe PDF ingestion job queued"}
+
+
+@router.post("/ingest-book-pdf", dependencies=[Depends(require_auth)])
+async def ingest_book_pdf(body: IngestBookPDFRequest, background_tasks: BackgroundTasks):
+    svc = PDFIngestionService(db=get_supabase_client())
+    background_tasks.add_task(_run_book_pdf, svc, body.record.id, body.record.file_path)
+    return {"status": "accepted", "message": "Cookbook PDF ingestion job queued"}
+
+
+@router.post("/ingest-book-chapter", dependencies=[Depends(require_auth)])
+async def ingest_book_chapter(body: IngestBookChapterRequest, background_tasks: BackgroundTasks):
+    svc = PDFIngestionService(db=get_supabase_client())
+    
+    # Parse chapter index from URL: pdf-book-chapter://<parent_id>/<chapter_index>
+    try:
+        url_parts = body.record.url.replace("pdf-book-chapter://", "").split("/")
+        parent_job_id = url_parts[0]
+        chapter_index = int(url_parts[1])
+    except Exception as e:
+        logger.exception("Failed to parse chapter_index from url=%s", body.record.url)
+        raise HTTPException(status_code=400, detail=f"Invalid job URL format: {body.record.url}")
+        
+    background_tasks.add_task(_run_book_chapter, svc, body.record.id, parent_job_id, chapter_index, body.record.file_path)
+    return {"status": "accepted", "message": "Book chapter PDF ingestion job queued"}
 
 
 @router.post("/ingest-recipe", dependencies=[Depends(require_auth)])
