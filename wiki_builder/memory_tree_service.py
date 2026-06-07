@@ -15,6 +15,22 @@ class MemoryTreeService:
         self._db = supabase_client
         self._client = genai_client
 
+    def _load_prompt(self, key: str) -> Optional[str]:
+        if not self._db:
+            return None
+        try:
+            resp = (
+                self._db.table("prompts")
+                .select("content")
+                .eq("key", key)
+                .single()
+                .execute()
+            )
+            return resp.data["content"]
+        except Exception as e:
+            logger.warning("Failed to load prompt %s from DB, using fallback: %s", key, e)
+            return None
+
     def _embed(self, text: str) -> List[float]:
         from shared.retry import retry_sync
         result = retry_sync(
@@ -59,7 +75,17 @@ class MemoryTreeService:
             recipes_context.append(f"- Ricetta: {r['title']}\n  Descrizione: {r.get('description', '')}")
 
         # 3. Invio prompt a Gemini
-        prompt = f"""Sei un esperto storico della gastronomia e tecnologo alimentare.
+        db_prompt = self._load_prompt("wiki_topic_tree_generation")
+        if db_prompt:
+            prompt = (
+                db_prompt
+                .replace("{{name}}", name)
+                .replace("{{type}}", topic.get('type') or '')
+                .replace("{{recipes_context}}", "\n".join(recipes_context))
+                .replace("{{mentions}}", "\n".join(f"- \"{m}\"" for m in mentions))
+            )
+        else:
+            prompt = f"""Sei un esperto storico della gastronomia e tecnologo alimentare.
 Genera una sintesi gerarchica in italiano per il tema culinario: "{name}" (tipo: {topic.get('type')}).
 
 Di seguito trovi i dettagli delle ricette che citano o utilizzano questo tema e i contesti in cui compare:
@@ -203,7 +229,15 @@ Rispondi SOLO con un JSON valido, senza markdown fence, senza testo extra:
             recipes_context.append(f"- {r['title']}: {r.get('description', '')}")
 
         today_str = datetime.date.today().strftime("%d/%m/%Y")
-        prompt = f"""Sei un critico gastronomico ed esperto di nutrizione.
+        db_prompt = self._load_prompt("wiki_daily_global_digest")
+        if db_prompt:
+            prompt = (
+                db_prompt
+                .replace("{{today_str}}", today_str)
+                .replace("{{recipes_context}}", "\n".join(recipes_context))
+            )
+        else:
+            prompt = f"""Sei un critico gastronomico ed esperto di nutrizione.
 Scrivi un breve sommario editoriale in italiano (2-4 frasi) dell'attività di cucina e inserimento ricette svolta in data {today_str}.
 Di seguito trovi l'elenco delle ricette elaborate oggi:
 

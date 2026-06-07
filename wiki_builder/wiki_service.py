@@ -80,7 +80,7 @@ class WikiService:
         self._db = supabase_client
         genai_client = google_genai.Client(api_key=gemini_api_key)
         embed_fn = _make_embed_fn(genai_client)
-        self._analyzer = SourceAnalyzer(genai_client=genai_client)
+        self._analyzer = SourceAnalyzer(genai_client=genai_client, supabase_client=supabase_client)
         self._factory = PageFactory(supabase_client=supabase_client, embed_fn=embed_fn)
         self._linker = CrossLinker(supabase_client=supabase_client)
         from wiki_builder.memory_tree_service import MemoryTreeService

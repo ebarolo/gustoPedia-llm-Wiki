@@ -117,17 +117,45 @@ def _parse_extraction_response(raw: str, recipe_id: str) -> Optional[SourceExtra
 
 
 class SourceAnalyzer:
-    def __init__(self, genai_client: Any) -> None:
+    def __init__(self, genai_client: Any, supabase_client: Optional[Any] = None) -> None:
         self._client = genai_client
+        self._db = supabase_client
+
+    def _load_prompt(self, key: str) -> Optional[str]:
+        if not self._db:
+            return None
+        try:
+            resp = (
+                self._db.table("prompts")
+                .select("content")
+                .eq("key", key)
+                .single()
+                .execute()
+            )
+            return resp.data["content"]
+        except Exception as e:
+            logger.warning("Failed to load prompt %s from DB, using fallback: %s", key, e)
+            return None
 
     def analyze(self, recipe: dict[str, Any]) -> Optional[SourceExtractionResult]:
-        prompt = _EXTRACTION_PROMPT_TEMPLATE.format(
-            title=recipe.get("title", ""),
-            ingredients=", ".join(recipe.get("ingredients", [])),
-            categories=", ".join(recipe.get("categories", [])),
-            difficulty=recipe.get("difficulty", "n/d"),
-            description=recipe.get("description", ""),
-        )
+        db_prompt = self._load_prompt("wiki_extract_entities_concepts")
+        if db_prompt:
+            prompt = (
+                db_prompt
+                .replace("{{title}}", recipe.get("title", ""))
+                .replace("{{ingredients}}", ", ".join(recipe.get("ingredients", [])))
+                .replace("{{categories}}", ", ".join(recipe.get("categories", [])))
+                .replace("{{difficulty}}", recipe.get("difficulty", "n/d"))
+                .replace("{{description}}", recipe.get("description", ""))
+            )
+        else:
+            prompt = _EXTRACTION_PROMPT_TEMPLATE.format(
+                title=recipe.get("title", ""),
+                ingredients=", ".join(recipe.get("ingredients", [])),
+                categories=", ".join(recipe.get("categories", [])),
+                difficulty=recipe.get("difficulty", "n/d"),
+                description=recipe.get("description", ""),
+            )
         try:
             from shared.retry import retry_sync
             response = retry_sync(
