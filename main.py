@@ -21,7 +21,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:4200",
         "http://127.0.0.1:4200",
-        "https://gnammy.app"
+        "https://gnammy.app",
+        "https://gnammy-dashboard-jm5uixsfpa-ew.a.run.app"
     ],
     allow_methods=["*"],
     allow_headers=["*"],
