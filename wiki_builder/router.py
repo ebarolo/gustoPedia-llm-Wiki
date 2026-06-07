@@ -59,21 +59,21 @@ class BackfillRequest(BaseModel):
 async def _run_recipe_pdf(svc: PDFIngestionService, job_id: str, file_path: str):
     try:
         await svc.process_recipe_pdf(job_id, file_path)
-    except Exception as e:
+    except Exception:
         logger.exception("Background process_recipe_pdf failed for job_id=%s", job_id)
 
 
 async def _run_book_pdf(svc: PDFIngestionService, job_id: str, file_path: str):
     try:
         await svc.process_book_pdf(job_id, file_path)
-    except Exception as e:
+    except Exception:
         logger.exception("Background process_book_pdf failed for job_id=%s", job_id)
 
 
 async def _run_book_chapter(svc: PDFIngestionService, job_id: str, parent_job_id: str, chapter_index: int, file_path: str):
     try:
         await svc.process_book_chapter(job_id, parent_job_id, chapter_index, file_path)
-    except Exception as e:
+    except Exception:
         logger.exception("Background process_book_chapter failed for job_id=%s", job_id)
 
 
@@ -100,7 +100,7 @@ async def ingest_book_chapter(body: IngestBookChapterRequest, background_tasks: 
         url_parts = body.record.url.replace("pdf-book-chapter://", "").split("/")
         parent_job_id = url_parts[0]
         chapter_index = int(url_parts[1])
-    except Exception as e:
+    except Exception:
         logger.exception("Failed to parse chapter_index from url=%s", body.record.url)
         raise HTTPException(status_code=400, detail=f"Invalid job URL format: {body.record.url}")
         

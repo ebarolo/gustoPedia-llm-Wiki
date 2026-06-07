@@ -2,7 +2,7 @@
 import datetime
 import json
 import logging
-from typing import Any, List, Dict, Optional
+from typing import List, Optional
 from supabase import Client
 from google import genai as google_genai
 from google.genai import types as genai_types

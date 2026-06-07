@@ -164,7 +164,6 @@ async def generate_recipe_image(
     db: Client,
 ) -> Optional[bytes]:
     """Generate a recipe thumbnail image using Gemini and return raw bytes."""
-    import base64
     client = genai.Client(api_key=gemini_api_key)
 
     title = recipe_data.get("title") or ""
