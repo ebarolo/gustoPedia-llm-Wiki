@@ -5,6 +5,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Align GOOGLE_API_KEY with GEMINI_API_KEY for google-genai compatibility
+if "GEMINI_API_KEY" not in os.environ and "GOOGLE_API_KEY" in os.environ:
+    os.environ["GEMINI_API_KEY"] = os.environ["GOOGLE_API_KEY"]
+
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from wiki_builder.router import router as wiki_router

@@ -6,6 +6,11 @@ from dotenv import load_dotenv
 # Load local environment variables from .env
 load_dotenv()
 
+# Align GOOGLE_API_KEY with GEMINI_API_KEY for google-genai compatibility
+if "GEMINI_API_KEY" not in os.environ and "GOOGLE_API_KEY" in os.environ:
+    os.environ["GEMINI_API_KEY"] = os.environ["GOOGLE_API_KEY"]
+
+
 from shared.supabase import get_supabase_client
 from social_ingestion.service import SocialIngestionService
 
