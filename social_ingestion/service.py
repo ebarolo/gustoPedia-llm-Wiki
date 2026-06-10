@@ -107,8 +107,6 @@ class SocialIngestionService:
             job_manager.set_completed(self._db, job_id, recipe_id)
             job_manager.append_log(self._db, job_id, "info", f"Completato. recipe_id={recipe_id}")
 
-            asyncio.create_task(self._trigger_wiki(recipe_id))
-
             return IngestJobResponse(job_id=job_id, status=JobStatus.COMPLETED, recipe_id=recipe_id)
 
         except Exception as exc:
@@ -123,13 +121,3 @@ class SocialIngestionService:
             result = await self.ingest_url(url)
             results.append(result)
         return results
-
-    async def _trigger_wiki(self, recipe_id: str) -> None:
-        try:
-            from wiki_builder.wiki_service import WikiService
-            from shared.supabase import get_supabase_client
-            svc = WikiService(supabase_client=get_supabase_client(), gemini_api_key=self._gemini_api_key)
-            svc.ingest_recipe(recipe_id)
-            logger.info("Wiki ingestion triggered for recipe_id=%s", recipe_id)
-        except Exception:
-            logger.exception("Wiki ingestion failed for recipe_id=%s (non-blocking)", recipe_id)

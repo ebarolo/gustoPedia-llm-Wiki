@@ -12,7 +12,6 @@ if "GEMINI_API_KEY" not in os.environ and "GOOGLE_API_KEY" in os.environ:
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from wiki_builder.router import router as wiki_router
 from social_ingestion.router import router as social_router
 
 logging.basicConfig(
@@ -20,7 +19,7 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
 )
 
-app = FastAPI(title="Gnammy Wiki Builder API", version="1.0.0")
+app = FastAPI(title="Gnammy Wiki API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -32,10 +31,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.include_router(wiki_router)
 app.include_router(social_router)
 
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "wiki-builder"}
+    return {"status": "ok", "service": "gnammy-wiki"}
