@@ -13,6 +13,7 @@ if "GEMINI_API_KEY" not in os.environ and "GOOGLE_API_KEY" in os.environ:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from social_ingestion.router import router as social_router
+from wiki.router import router as wiki_router
 
 logging.basicConfig(
     level=os.environ.get("LOG_LEVEL", "INFO"),
@@ -32,6 +33,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(social_router)
+app.include_router(wiki_router)
 
 
 @app.get("/health")

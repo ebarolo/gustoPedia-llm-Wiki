@@ -1,16 +1,11 @@
 import logging
 from typing import Any, Optional
 
-from google import genai
-from google.genai import types
 from supabase import Client
 
-from shared.retry import retry_sync
+from shared.embeddings import embed_text
 
 logger = logging.getLogger(__name__)
-
-_EMBED_MODEL = "gemini-embedding-2"
-_EMBED_TASK_TYPE = "RETRIEVAL_DOCUMENT"
 
 
 def _normalize_tag(name: str) -> Optional[str]:
@@ -41,7 +36,6 @@ def _build_recipe_payload(
 
 
 def generate_embedding(recipe_data: dict[str, Any], gemini_api_key: str) -> list[float]:
-    client = genai.Client(api_key=gemini_api_key)
     ingredients = recipe_data.get("ingredients") or []
     tags = recipe_data.get("tags") or []
     text = (
@@ -50,18 +44,7 @@ def generate_embedding(recipe_data: dict[str, Any], gemini_api_key: str) -> list
         f"Tag: {', '.join(tags)}. "
         f"Ingredienti: {', '.join(i['name'] for i in ingredients if i.get('name'))}"
     )
-    result = retry_sync(
-        client.models.embed_content,
-        model=_EMBED_MODEL,
-        contents=text,
-        config=types.EmbedContentConfig(
-            task_type=_EMBED_TASK_TYPE,
-            output_dimensionality=768,
-        ),
-        max_retries=3,
-        initial_delay=0.5
-    )
-    return result.embeddings[0].values
+    return embed_text(text, gemini_api_key)
 
 
 def write_recipe(
