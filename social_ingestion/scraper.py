@@ -10,7 +10,7 @@ from social_ingestion.models import Platform, ScrapeResult
 
 logger = logging.getLogger(__name__)
 
-_INSTAGRAM_API_HOST = "instagram-public-bulk-scraper.p.rapidapi.com"
+_INSTAGRAM_API_HOST = "instagram-downloader-v2-scraper-reels-igtv-posts-stories.p.rapidapi.com"
 _YOUTUBE_API_HOST = "youtube-video-fast-downloader-24-7.p.rapidapi.com"
 _YOUTUBE_POLL_ATTEMPTS = 15
 _YOUTUBE_POLL_INTERVAL_S = 3.0
@@ -29,31 +29,6 @@ def _detect_instagram_content_type(url: str) -> str:
         return "post"
     return "generic"
 
-
-def _extract_instagram_media_url(data: dict[str, Any], content_type: str) -> str:
-    if data.get("status") == "error":
-        raise ValueError(f"Instagram API error: {data.get('message', 'Unknown error')}")
-
-    d = data.get("data", data)
-    if not isinstance(d, dict):
-        raise ValueError(f"Invalid Instagram API response format: data is {type(d).__name__}")
-
-    if content_type in ("story", "reel"):
-        url = (
-            d.get("video_url")
-            or (d.get("media_versions") or [{}])[0].get("url")
-            or data.get("video_url")
-        )
-    else:
-        url = (
-            d.get("video_url")
-            or d.get("display_url")
-            or data.get("video_url")
-            or data.get("display_url")
-        )
-    if not url:
-        raise ValueError(f"No media URL found in Instagram response for type={content_type}")
-    return url
 
 
 def _clean_instagram_caption(raw: str) -> str:
@@ -89,25 +64,35 @@ async def _scrape_instagram(url: str, api_key: str, client: httpx.AsyncClient) -
     content_type = _detect_instagram_content_type(url)
     logger.info("Instagram content type: %s", content_type)
 
-    encoded = httpx.URL(url)
-    api_url = f"https://{_INSTAGRAM_API_HOST}/v1/media_info?code_or_id_or_url={encoded}"
+    api_url = f"https://{_INSTAGRAM_API_HOST}/get-post"
+    params = {"url": url}
     
     async def make_request():
-        resp = await client.get(api_url, headers=_rapidapi_headers(api_key, _INSTAGRAM_API_HOST))
+        resp = await client.get(
+            api_url,
+            headers=_rapidapi_headers(api_key, _INSTAGRAM_API_HOST),
+            params=params
+        )
         resp.raise_for_status()
         return resp.json()
 
     data = await retry_async(make_request, max_retries=3, initial_delay=1.0)
-
-    media_url = _extract_instagram_media_url(data, content_type)
-    edges = (data.get("data") or {}).get("edge_media_to_caption", {}).get("edges", [])
-    caption_text = edges[0].get("node", {}).get("text", "") if edges else ""
-    caption = _clean_instagram_caption(caption_text)
-
-    d = data.get("data", data)
-    thumbnail_url = d.get("display_url") if isinstance(d, dict) else None
-
-    mime = "video/mp4" if content_type in ("reel", "story") else "image/jpeg"
+    
+    if not isinstance(data, dict) or "media" not in data or not isinstance(data["media"], list) or not data["media"]:
+        raise ValueError(f"Invalid or empty Instagram API response format: {data}")
+    
+    first_item = data["media"][0]
+    media_url = first_item.get("url")
+    if not media_url:
+        raise ValueError("No media URL found in Instagram response")
+        
+    thumbnail_url = first_item.get("thumb")
+    is_video = first_item.get("is_video", False)
+    
+    raw_caption = first_item.get("caption", "")
+    caption = _clean_instagram_caption(raw_caption) if raw_caption else ""
+    
+    mime = "video/mp4" if is_video else "image/jpeg"
     return ScrapeResult(
         media_url=media_url,
         caption=caption,
