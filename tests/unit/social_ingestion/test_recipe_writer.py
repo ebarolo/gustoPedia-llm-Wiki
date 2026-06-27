@@ -1,4 +1,4 @@
-from social_ingestion.recipe_writer import _normalize_tag, _build_recipe_payload
+from gnammyWiki.social_ingestion.recipe_writer import _normalize_tag, _build_recipe_payload
 
 
 def test_normalize_tag_lowercases_and_strips():

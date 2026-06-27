@@ -1,5 +1,5 @@
-from wiki.parser import PageBlock
-from wiki.repair import MAX_STUBS_PER_INGEST, repair_dangling_links
+from gnammyWiki.wiki.parser import PageBlock
+from gnammyWiki.wiki.repair import MAX_STUBS_PER_INGEST, repair_dangling_links
 
 
 def _block(slug: str, md: str) -> PageBlock:

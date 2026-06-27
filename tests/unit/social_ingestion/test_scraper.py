@@ -1,5 +1,5 @@
 import pytest
-from social_ingestion.scraper import (
+from gnammyWiki.social_ingestion.scraper import (
     _extract_instagram_media_url,
     _extract_youtube_video_id,
 )

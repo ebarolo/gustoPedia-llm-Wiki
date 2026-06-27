@@ -1,4 +1,4 @@
-from wiki.parser import (
+from gnammyWiki.wiki.parser import (
     demote_link,
     extract_wikilinks,
     is_safe_slug,

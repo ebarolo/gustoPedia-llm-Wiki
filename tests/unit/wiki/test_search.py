@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock, patch
 
-from wiki.search import search_wiki_pages
+from gnammyWiki.wiki.search import search_wiki_pages
 
 
 def _db_returning(rows):

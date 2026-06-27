@@ -1,4 +1,4 @@
-from wiki.chunker import (
+from gnammyWiki.wiki.chunker import (
     MAX_CHARS,
     MIN_CHARS,
     OVERLAP_CHARS,

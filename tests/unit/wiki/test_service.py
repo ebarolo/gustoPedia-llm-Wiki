@@ -2,8 +2,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from wiki.models import AnalysisCreate, AnalysisResult, AnalysisUpdate
-from wiki.service import WikiIngestionService
+from gnammyWiki.wiki.models import AnalysisCreate, AnalysisResult, AnalysisUpdate
+from gnammyWiki.wiki.service import WikiIngestionService
 
 RECIPE_ROW = {
     "id": "r-1",

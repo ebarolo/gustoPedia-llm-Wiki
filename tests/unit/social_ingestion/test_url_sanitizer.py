@@ -1,6 +1,6 @@
 import pytest
-from social_ingestion.url_sanitizer import sanitize_url, detect_platform
-from social_ingestion.models import Platform
+from gnammyWiki.social_ingestion.url_sanitizer import sanitize_url, detect_platform
+from gnammyWiki.social_ingestion.models import Platform
 
 
 def test_youtube_keeps_only_v_param():
