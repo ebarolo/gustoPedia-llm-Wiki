@@ -51,6 +51,7 @@ class BackfillRequest(BaseModel):
 class ProcessQueueResponse(BaseModel):
     status: str
     pending: int
+    processed: int = 0
 
 
 class WikiJobResponse(BaseModel):

@@ -1,5 +1,4 @@
 # gnammyWiki/wiki/router.py
-import asyncio
 import logging
 
 from typing import Optional
@@ -24,11 +23,18 @@ router = APIRouter(prefix="/wiki", tags=["wiki"], dependencies=[Depends(require_
 
 @router.post("/process-queue", response_model=ProcessQueueResponse)
 async def process_queue() -> ProcessQueueResponse:
-    """Kick del worker: avvia il drain della coda in background e ritorna subito."""
+    """Drena la coda DENTRO la richiesta (await), entro un budget di tempo.
+
+    Sincrono di proposito: su Cloud Run la CPU è allocata solo finché l'handler
+    gira, quindi un drain in background verrebbe congelato alla response
+    (job bloccati su 'processing'). I job oltre il budget restano in coda e li
+    drena il kick successivo o la crash-recovery a 15 min della claim RPC.
+    """
     db = get_supabase_client()
-    pending = job_manager.count_pending(db)
-    asyncio.create_task(worker.drain(db))
-    return ProcessQueueResponse(status="kicked", pending=pending)
+    processed = await worker.drain(db, max_seconds=worker.DEFAULT_DRAIN_BUDGET_SECONDS)
+    return ProcessQueueResponse(
+        status="drained", processed=processed, pending=job_manager.count_pending(db)
+    )
 
 
 @router.post("/backfill", response_model=ProcessQueueResponse)
@@ -51,8 +57,13 @@ async def backfill(payload: BackfillRequest) -> ProcessQueueResponse:
             enqueued += 1
     logger.info("Backfill wiki: %d job accodati su %d ricette", enqueued, len(recipe_ids))
 
-    asyncio.create_task(worker.drain(db))
-    return ProcessQueueResponse(status="backfill-started", pending=job_manager.count_pending(db))
+    # Drena un primo lotto entro il budget; il resto lo prendono i kick per-job
+    # (un trigger per ogni job inserito) e la crash-recovery. Per backfill grossi
+    # usare limit piccoli o chiamate ripetute.
+    processed = await worker.drain(db, max_seconds=worker.DEFAULT_DRAIN_BUDGET_SECONDS)
+    return ProcessQueueResponse(
+        status="backfill-drained", processed=processed, pending=job_manager.count_pending(db)
+    )
 
 
 @router.get("/search")
