@@ -16,7 +16,10 @@ logger = logging.getLogger(__name__)
 # parser fa da rete di sicurezza.
 MAX_PAGE_CHARS = 30_000
 
-_OPENER_LINE = re.compile(r"^---\s*PAGE:\s*(.+?)\s*---\s*$", re.IGNORECASE)
+# Il `---` di chiusura sull'opener è opzionale: gemini-3.5-flash a volte emette
+# `---PAGE: slug` senza i trattini finali. Senza questa tolleranza l'opener non
+# matcha, nessun blocco apre e la generazione risulta "vuota" (0 blocchi, 0 warning).
+_OPENER_LINE = re.compile(r"^---\s*PAGE:\s*(.+?)\s*(?:---)?\s*$", re.IGNORECASE)
 _CLOSER_LINE = re.compile(r"^---\s*END\s*---\s*$", re.IGNORECASE)
 _FENCE_LINE = re.compile(r"^\s{0,3}(`{3,}|~{3,})")
 _SLUG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
