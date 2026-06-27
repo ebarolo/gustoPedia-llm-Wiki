@@ -65,19 +65,19 @@ async def test_ingest_writes_planned_pages_only(service):
         "source_recipe_ids": [],
     }
 
-    with patch("wiki.service.WikiIngestionService._fetch_recipe", return_value=RECIPE_ROW), \
-         patch("wiki.service.page_store.fetch_index", return_value=[
+    with patch("gnammyWiki.wiki.service.WikiIngestionService._fetch_recipe", return_value=RECIPE_ROW), \
+         patch("gnammyWiki.wiki.service.page_store.fetch_index", return_value=[
              {"slug": "guanciale", "title": "Guanciale", "page_type": "ingrediente", "summary": "s"}
          ]), \
-         patch("wiki.service.analyzer.analyze", return_value=analysis), \
-         patch("wiki.service.page_store.fetch_pages_by_slugs", return_value=[existing_guanciale]), \
-         patch("wiki.service.generator.generate", return_value=GENERATION), \
-         patch("wiki.service.page_store.upsert_page", side_effect=["p-guanciale", "p-carbonara"]) as upsert, \
-         patch("wiki.service.page_store.slug_to_id_map", return_value={}), \
-         patch("wiki.service.page_store.replace_links") as replace_links, \
-         patch("wiki.service.page_store.insert_log") as insert_log, \
-         patch("wiki.service.embedder.rechunk_and_embed", return_value=1), \
-         patch("wiki.service.job_manager.append_log"):
+         patch("gnammyWiki.wiki.service.analyzer.analyze", return_value=analysis), \
+         patch("gnammyWiki.wiki.service.page_store.fetch_pages_by_slugs", return_value=[existing_guanciale]), \
+         patch("gnammyWiki.wiki.service.generator.generate", return_value=GENERATION), \
+         patch("gnammyWiki.wiki.service.page_store.upsert_page", side_effect=["p-guanciale", "p-carbonara"]) as upsert, \
+         patch("gnammyWiki.wiki.service.page_store.slug_to_id_map", return_value={}), \
+         patch("gnammyWiki.wiki.service.page_store.replace_links") as replace_links, \
+         patch("gnammyWiki.wiki.service.page_store.insert_log") as insert_log, \
+         patch("gnammyWiki.wiki.service.embedder.rechunk_and_embed", return_value=1), \
+         patch("gnammyWiki.wiki.service.job_manager.append_log"):
         pages = await service.ingest_recipe("job-1", "r-1")
 
     # whitelist: il blocco fuori-piano non viene scritto
@@ -104,12 +104,12 @@ async def test_ingest_writes_planned_pages_only(service):
 
 @pytest.mark.asyncio
 async def test_ingest_empty_analysis_skips_generation(service):
-    with patch("wiki.service.WikiIngestionService._fetch_recipe", return_value=RECIPE_ROW), \
-         patch("wiki.service.page_store.fetch_index", return_value=[]), \
-         patch("wiki.service.analyzer.analyze", return_value=AnalysisResult()), \
-         patch("wiki.service.generator.generate") as generate, \
-         patch("wiki.service.page_store.insert_log") as insert_log, \
-         patch("wiki.service.job_manager.append_log"):
+    with patch("gnammyWiki.wiki.service.WikiIngestionService._fetch_recipe", return_value=RECIPE_ROW), \
+         patch("gnammyWiki.wiki.service.page_store.fetch_index", return_value=[]), \
+         patch("gnammyWiki.wiki.service.analyzer.analyze", return_value=AnalysisResult()), \
+         patch("gnammyWiki.wiki.service.generator.generate") as generate, \
+         patch("gnammyWiki.wiki.service.page_store.insert_log") as insert_log, \
+         patch("gnammyWiki.wiki.service.job_manager.append_log"):
         pages = await service.ingest_recipe("job-1", "r-1")
 
     assert pages == []
@@ -122,12 +122,12 @@ async def test_ingest_no_valid_blocks_raises(service):
     analysis = AnalysisResult(
         create=[AnalysisCreate(slug="carbonara", title="Carbonara", page_type="piatto")],
     )
-    with patch("wiki.service.WikiIngestionService._fetch_recipe", return_value=RECIPE_ROW), \
-         patch("wiki.service.page_store.fetch_index", return_value=[]), \
-         patch("wiki.service.analyzer.analyze", return_value=analysis), \
-         patch("wiki.service.page_store.fetch_pages_by_slugs", return_value=[]), \
-         patch("wiki.service.generator.generate", return_value="testo senza blocchi"), \
-         patch("wiki.service.page_store.insert_log"), \
-         patch("wiki.service.job_manager.append_log"):
+    with patch("gnammyWiki.wiki.service.WikiIngestionService._fetch_recipe", return_value=RECIPE_ROW), \
+         patch("gnammyWiki.wiki.service.page_store.fetch_index", return_value=[]), \
+         patch("gnammyWiki.wiki.service.analyzer.analyze", return_value=analysis), \
+         patch("gnammyWiki.wiki.service.page_store.fetch_pages_by_slugs", return_value=[]), \
+         patch("gnammyWiki.wiki.service.generator.generate", return_value="testo senza blocchi"), \
+         patch("gnammyWiki.wiki.service.page_store.insert_log"), \
+         patch("gnammyWiki.wiki.service.job_manager.append_log"):
         with pytest.raises(RuntimeError):
             await service.ingest_recipe("job-1", "r-1")

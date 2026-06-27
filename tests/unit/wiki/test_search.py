@@ -12,7 +12,7 @@ def _db_returning(rows):
 def test_search_passes_embedding(monkeypatch):
     monkeypatch.setenv("GEMINI_API_KEY", "test-key")
     db = _db_returning([{"slug": "guanciale"}])
-    with patch("wiki.search.embed_text", return_value=[0.1] * 768):
+    with patch("gnammyWiki.wiki.search.embed_text", return_value=[0.1] * 768):
         rows = search_wiki_pages(db, "guanciale", top_k=3, page_types=["ingrediente"])
     assert rows == [{"slug": "guanciale"}]
     params = db.rpc.call_args.args[1]
@@ -24,7 +24,7 @@ def test_search_passes_embedding(monkeypatch):
 def test_search_embedding_failure_falls_back_to_keyword(monkeypatch):
     monkeypatch.setenv("GEMINI_API_KEY", "test-key")
     db = _db_returning([])
-    with patch("wiki.search.embed_text", side_effect=RuntimeError("timeout")):
+    with patch("gnammyWiki.wiki.search.embed_text", side_effect=RuntimeError("timeout")):
         rows = search_wiki_pages(db, "guanciale")
     assert rows == []
     params = db.rpc.call_args.args[1]
