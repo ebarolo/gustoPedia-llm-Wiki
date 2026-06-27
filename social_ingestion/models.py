@@ -37,3 +37,5 @@ class IngestJobResponse(BaseModel):
     status: JobStatus
     recipe_id: Optional[str] = None
     error: Optional[str] = None
+    already_exists: bool = False
+

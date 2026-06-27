@@ -38,6 +38,7 @@ class SocialIngestionService:
                     job_id=row["id"],
                     status=JobStatus(row["status"]),
                     recipe_id=row.get("recipe_id"),
+                    already_exists=True,
                 )
 
         job_id = job_manager.create_job(self._db, clean_url)
