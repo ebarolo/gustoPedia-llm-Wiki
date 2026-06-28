@@ -1,4 +1,4 @@
-# gnammyWiki/wiki/job_manager.py
+# GustoPedia/wiki/job_manager.py
 import logging
 from typing import Any, Optional
 
@@ -68,7 +68,7 @@ def append_log(db: Client, job_id: str, level: str, msg: str) -> None:
             "append_wiki_ingestion_log",
             {
                 "job_id": job_id,
-                "log_message": f"[{level.upper()}][gnammyWiki] {msg}",
+                "log_message": f"[{level.upper()}][GustoPedia] {msg}",
             },
         ).execute()
     except Exception:

@@ -1,4 +1,4 @@
-# gnammyWiki/wiki/service.py
+# GustoPedia/wiki/service.py
 import json
 import logging
 import os
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class WikiIngestionService:
-    """Pipeline ingest 2-step (docs/gnammy-wiki-plan.md §5):
+    """Pipeline ingest 2-step (docs/gustopedia-plan.md §5):
     analysis (cosa toccare) → generation (contenuto) → parse/validazione →
     repair → scrittura con re-embed incrementale + wiki_log."""
 

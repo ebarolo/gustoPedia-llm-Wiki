@@ -1,4 +1,4 @@
-# gnammyWiki/wiki/prompts.py
+# GustoPedia/wiki/prompts.py
 import logging
 
 from supabase import Client

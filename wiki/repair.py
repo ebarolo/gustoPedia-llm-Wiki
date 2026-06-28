@@ -1,4 +1,4 @@
-# gnammyWiki/wiki/repair.py
+# GustoPedia/wiki/repair.py
 import logging
 
 from wiki.parser import PageBlock, demote_link, iter_wikilinks

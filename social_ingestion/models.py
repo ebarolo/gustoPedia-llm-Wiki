@@ -1,4 +1,4 @@
-# gnammyWiki/social_ingestion/models.py
+# GustoPedia/social_ingestion/models.py
 from enum import Enum
 from typing import Optional
 from pydantic import BaseModel

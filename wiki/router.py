@@ -1,4 +1,4 @@
-# gnammyWiki/wiki/router.py
+# GustoPedia/wiki/router.py
 import logging
 
 from typing import Optional

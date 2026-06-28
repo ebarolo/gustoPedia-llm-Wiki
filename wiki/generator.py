@@ -1,4 +1,4 @@
-# gnammyWiki/wiki/generator.py
+# GustoPedia/wiki/generator.py
 import logging
 
 from google import genai

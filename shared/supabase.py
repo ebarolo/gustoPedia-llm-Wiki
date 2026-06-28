@@ -1,4 +1,4 @@
-# gnammyAssistant/shared/supabase.py
+# GustoPedia/shared/supabase.py
 import os
 from supabase import Client, create_client
 

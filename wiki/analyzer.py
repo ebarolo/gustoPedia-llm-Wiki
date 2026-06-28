@@ -1,4 +1,4 @@
-# gnammyWiki/wiki/analyzer.py
+# GustoPedia/wiki/analyzer.py
 import json
 import logging
 import re
@@ -19,7 +19,7 @@ _MODEL = "gemini-3.5-flash"
 _WIKI_PURPOSE = (
     "Scopo della wiki: accumulare conoscenza culinaria trasversale "
     "(ingredienti, tecniche, piatti, regioni, concetti) compilata una volta "
-    "all'ingest e mantenuta nel tempo, a servizio degli agenti e dell'app Gnammy."
+    "all'ingest e mantenuta nel tempo, a servizio degli agenti e dell'app GustoPedia."
 )
 
 

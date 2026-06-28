@@ -41,7 +41,7 @@ def append_log(db: Client, job_id: str, level: str, msg: str) -> None:
             "append_ingestion_log",
             {
                 "job_id": job_id,
-                "log_message": f"[{level.upper()}][gnammyWiki] {msg}",
+                "log_message": f"[{level.upper()}][GustoPedia] {msg}",
             },
         ).execute()
     except Exception:

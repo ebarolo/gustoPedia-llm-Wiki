@@ -1,4 +1,4 @@
-# gnammyWiki/wiki/worker.py
+# GustoPedia/wiki/worker.py
 import asyncio
 import logging
 import time

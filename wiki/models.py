@@ -1,4 +1,4 @@
-# gnammyWiki/wiki/models.py
+# GustoPedia/wiki/models.py
 from enum import Enum
 from typing import Optional
 

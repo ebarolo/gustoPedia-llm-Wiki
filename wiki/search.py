@@ -1,4 +1,4 @@
-# gnammyWiki/wiki/search.py
+# GustoPedia/wiki/search.py
 import logging
 import os
 from typing import Any, Optional

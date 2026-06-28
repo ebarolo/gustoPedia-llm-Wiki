@@ -20,14 +20,14 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
 )
 
-app = FastAPI(title="Gnammy Wiki API", version="1.0.0")
+app = FastAPI(title="GustoPedia API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:4200",
         "http://127.0.0.1:4200",
-        "https://gnammy.app",
-        "https://gnammy-dashboard-jm5uixsfpa-ew.a.run.app"
+        "https://gustopedia.app",
+        "https://gustopedia-dashboard-jm5uixsfpa-ew.a.run.app"
     ],
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,4 +38,4 @@ app.include_router(wiki_router)
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "gnammy-wiki"}
+    return {"status": "ok", "service": "gustopedia-wiki"}

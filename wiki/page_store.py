@@ -1,4 +1,4 @@
-# gnammyWiki/wiki/page_store.py
+# GustoPedia/wiki/page_store.py
 import logging
 from typing import Any, Optional
 

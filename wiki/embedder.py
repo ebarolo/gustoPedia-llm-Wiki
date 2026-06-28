@@ -1,4 +1,4 @@
-# gnammyWiki/wiki/embedder.py
+# GustoPedia/wiki/embedder.py
 import logging
 
 from supabase import Client

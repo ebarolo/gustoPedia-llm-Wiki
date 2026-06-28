@@ -1,6 +1,6 @@
-# Gnammy Wiki Service
+# GustoPedia Service
 
-Gnammy Wiki is a high-performance Python FastAPI service designed to orchestrate social media recipe ingestion and semantically organize recipe information into a dynamic, self-healing wiki. It leverages Google Gemini for structured extraction and markdown generation, Cloudflare R2 for media hosting, and Supabase for persistent storage and hybrid semantic search.
+GustoPedia is a high-performance Python FastAPI service designed to orchestrate social media recipe ingestion and semantically organize recipe information into a dynamic, self-healing wiki. It leverages Google Gemini for structured extraction and markdown generation, Cloudflare R2 for media hosting, and Supabase for persistent storage and hybrid semantic search.
 
 ---
 
@@ -78,7 +78,7 @@ cp .env.example .env
 | `SUPABASE_URL` | Your Supabase project URL. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key for admin access (required to write to restricted tables). |
 | `GEMINI_API_KEY` | Google Gemini API key (supports multimodal models and embeddings). |
-| `GNAMMY_API_SHARED_SECRET` | Header secret token to authorize requests (leave empty to disable auth). |
+| `GUSTOPEDIA_API_SHARED_SECRET` | Header secret token to authorize requests (leave empty to disable auth). |
 | `RAPID_API_KEY` | RapidAPI key used to authenticate Instagram and YouTube downloaders. |
 | `R2_ACCOUNT_ID` | Cloudflare Account ID for R2 storage. |
 | `R2_ACCESS_KEY_ID` | Cloudflare R2 Access Key ID. |
@@ -129,10 +129,10 @@ You can package the application into a Docker container. The service listens on 
 
 ```bash
 # Build the image
-docker build -t gnammy-wiki-service .
+docker build -t gustopedia-service .
 
 # Run the container locally
-docker run --env-file .env -p 8080:8080 gnammy-wiki-service
+docker run --env-file .env -p 8080:8080 gustopedia-service
 ```
 
 ### Deploy to Google Cloud Run
@@ -140,13 +140,13 @@ This service is designed to work seamlessly on **Google Cloud Run** using a serv
 
 1. **Build and push** the image to Google Artifact Registry:
    ```bash
-   gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/gnammy-wiki
+   gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/gustopedia
    ```
 
 2. **Deploy** to Cloud Run:
    ```bash
-   gcloud run deploy gnammy-wiki \
-     --image gcr.io/YOUR_PROJECT_ID/gnammy-wiki \
+   gcloud run deploy gustopedia \
+     --image gcr.io/YOUR_PROJECT_ID/gustopedia \
      --platform managed \
      --region europe-west1 \
      --allow-unauthenticated

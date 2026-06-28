@@ -1,4 +1,4 @@
-# gnammyWiki/shared/prompt_cache.py
+# GustoPedia/shared/prompt_cache.py
 import time
 from typing import Any, Dict, Optional
 
